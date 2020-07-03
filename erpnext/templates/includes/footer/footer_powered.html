@@ -10,9 +10,17 @@
 	'Agriculture': '/agriculture',
 	'Hospitality': ''
 } %}
+
 {% set link = '' %}
+{% set label = '' %}
 {% if domains %}
-	{% set link = links[domains[0].domain] %}
+	{% set label = domains[0].domain %}
+	{% set link = links[label] %}
+{% endif %}
+
+{% if label == "Services" %}
+	{% set label = "Service" %}
 {% endif %}
 
 <a href="https://clouderp.one" target="_blank" class="text-muted">Powered by CloudERP - {{ '' if domains else 'Open Source' }} ERP Software {{ ('for ' + domains[0].domain + ' Companies') if domains else '' }}</a>
+
