@@ -176,6 +176,7 @@ erpnext.PointOfSale.ItemSelector = class {
             variant_of = variant_of === "undefined" ? undefined : variant_of;
             has_variants = has_variants === "undefined" ? undefined : has_variants;
             if (has_variants == 1) {
+                frappe.dom.freeze();
                 me.events.get_item_variants(item_code);
             }
             else {
