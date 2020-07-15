@@ -18,6 +18,7 @@
   "column_break_9",
   "update_stock",
   "hide_variants",
+  "allow_send_for_production",
   "ignore_pricing_rule",
   "allow_delete",
   "allow_user_to_edit_rate",
@@ -360,12 +361,18 @@
    "fieldname": "hide_variants",
    "fieldtype": "Check",
    "label": "Hide Variants"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_send_for_production",
+   "fieldtype": "Check",
+   "label": "Allow Send for Production"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-07-13 02:45:17.862698",
+ "modified": "2020-07-15 23:07:48.259403",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
