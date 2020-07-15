@@ -19,7 +19,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	display_items_in_stock = 0
 
 	if pos_profile:
-		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
+		warehouse, display_items_in_stock, hide_variants = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock', 'hide_variants'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -33,7 +33,9 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	barcode = data.get("barcode") if data.get("barcode") else ""
 
 	condition = get_conditions(item_code, serial_no, batch_no, barcode)
-	conditions = " AND variant_of IS NULL"
+	conditions = ""
+	if hide_variants:
+		conditions = " AND variant_of IS NULL"
 	if pos_profile:
 		condition += get_item_group_condition(pos_profile)
 

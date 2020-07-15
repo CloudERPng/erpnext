@@ -17,6 +17,7 @@
   "company_address",
   "column_break_9",
   "update_stock",
+  "hide_variants",
   "ignore_pricing_rule",
   "allow_delete",
   "allow_user_to_edit_rate",
@@ -353,12 +354,18 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_variants",
+   "fieldtype": "Check",
+   "label": "Hide Variants"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-06-01 15:46:01.944926",
+ "modified": "2020-07-13 02:45:17.862698",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

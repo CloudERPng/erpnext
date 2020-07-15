@@ -560,6 +560,9 @@ erpnext.PointOfSale.Controller = class {
 				},
 
 				submit_invoice: () => {
+					if (this.payment.$apply_sales_order) {
+						this.frm.doc.apply_sales_order = 1;
+					}
 					this.frm.savesubmit()
 						.then((r) => {
 							// this.set_invoice_status();
