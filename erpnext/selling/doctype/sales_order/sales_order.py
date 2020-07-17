@@ -923,7 +923,7 @@ def make_work_orders(items, sales_order, company, project=None):
 	'''Make Work Orders against the given Sales Order for the given `items`'''
 	items = json.loads(items).get('items')
 	out = []
-
+	production_note = frappe.get_value('Sales Order', sales_order, "production_note")
 	for i in items:
 		if not i.get("bom"):
 			frappe.throw(_("Please select BOM against item {0}").format(i.get("item_code")))
@@ -940,7 +940,8 @@ def make_work_orders(items, sales_order, company, project=None):
 			sales_order_item=i['sales_order_item'],
 			project=project,
 			fg_warehouse=i['warehouse'],
-			description=i['description']
+			description=i['description'],
+			production_note=production_note
 		)).insert()
 		work_order.set_work_order_operations()
 		work_order.save()

@@ -68,7 +68,7 @@ class POSInvoice(SalesInvoice):
 		if self.apply_sales_order == 1 and self.docstatus == 1:
 			sales_order_doc = make_sales_order(self.name)
 			if sales_order_doc:
-				sales_order_doc.delivery_date = nowdate()
+				sales_order_doc.delivery_date = self.delivery_date or nowdate()
 				sales_order_doc.flags.ignore_permissions = True
 				sales_order_doc.flags.ignore_account_permission = True
 				sales_order_doc.save()
