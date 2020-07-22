@@ -204,9 +204,9 @@ erpnext.PointOfSale.ItemSelector = class {
                     let pesokg1 = e.target.value.substr(7,5);
                     let pesokg;
                     if (pesokg1.startsWith('0000')) {
-                        pesokg='0.' + pesokg1.substr(4);
+                        pesokg='0.00' + pesokg1.substr(4);
                     } else if (pesokg1.startsWith('000')) {
-                        pesokg='0.' + pesokg1.substr(3);
+                        pesokg='0.0' + pesokg1.substr(3);
                     } else if (pesokg1.startsWith('00')) {
                         pesokg='0.' + pesokg1.substr(2);
                     } else if (pesokg1.startsWith('0')) {
@@ -214,7 +214,7 @@ erpnext.PointOfSale.ItemSelector = class {
                     } else if (!pesokg1.startsWith('0')) {
                         pesokg=pesokg1.substr(0,2) +'.' + pesokg1.substr(2,pesokg1.length);
                     }
-                    me.pesokg = pesokg;  
+                    me.pesokg = pesokg;
                 }else {
                     search_term = e.target.value;
                 }

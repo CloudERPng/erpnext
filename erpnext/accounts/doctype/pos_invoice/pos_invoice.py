@@ -402,19 +402,11 @@ def make_merge_log(invoices):
 
 
 def make_sales_order(source_name, target_doc=None):
-	# quotation = frappe.db.get_value("POS Invoice", source_name, ["transaction_date", "valid_till"], as_dict = 1)
 	return _make_sales_order(source_name, target_doc)
 
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
-	# customer = _make_customer(source_name, ignore_permissions)
 
 	def set_missing_values(source, target):
-		# if customer:
-		# 	target.customer = customer.name
-		# 	target.customer_name = customer.customer_name
-		# if source.referral_sales_partner:
-		# 	target.sales_partner=source.referral_sales_partner
-		# 	target.commission_rate=frappe.get_value('Sales Partner', source.referral_sales_partner, 'commission_rate')
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -422,11 +414,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
-
-		# if obj.against_blanket_order:
-		# 	target.against_blanket_order = obj.against_blanket_order
-		# 	target.blanket_order = obj.blanket_order
-		# 	target.blanket_order_rate = obj.blanket_order_rate
 
 	doclist = get_mapped_doc("POS Invoice", source_name, {
 			"POS Invoice": {
@@ -456,7 +443,5 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"add_if_empty": True
 			}
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
-
-	# postprocess: fetch shipping address, set missing values
 
 	return doclist
