@@ -580,7 +580,6 @@ erpnext.PointOfSale.Controller = class {
 			}
 		});
 		frappe.db.get_doc("POS Profile", this.pos_profile).then((profile) => {
-			console.log(profile.allow_send_for_production);
 			if (profile.allow_send_for_production != 1) {
 				this.payment.$apply_sales_order.parent().remove();
 			}
@@ -760,7 +759,7 @@ erpnext.PointOfSale.Controller = class {
 			const { item_code, batch_no, serial_no, uom, variant_of, has_variants } = item;
 			let item_row = this.get_item_from_frm(item_code, batch_no, uom);
 
-			const item_selected_from_selector = field === 'qty' && value === "+1"
+			const item_selected_from_selector = field === 'qty' 
 
 			if (item_row) {
 				item_selected_from_selector && (value = item_row.qty + flt(value))
