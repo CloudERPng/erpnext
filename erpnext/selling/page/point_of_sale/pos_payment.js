@@ -25,6 +25,10 @@ erpnext.PointOfSale.Payment = class {
 					</div>
 					<div class="payment-modes flex flex-wrap"></div>
 					<div class="invoice-details-section"></div>
+					<div class="checkbox flex">
+						<input type="checkbox" class="apply-sales-order input-with-feedback" data-fieldtype="Check"</input>
+						<span class="label-area">Send for Production</span>
+					</div>
                     <div class="flex mt-auto justify-center w-full">
                         <div class="flex flex-col justify-center flex-1 ml-4">
                             <div class="flex w-full">
@@ -50,6 +54,7 @@ erpnext.PointOfSale.Payment = class {
 		this.$remarks = this.$component.find('.remarks');
 		this.$numpad = this.$component.find('.number-pad');
 		this.$invoice_details_section = this.$component.find('.invoice-details-section');
+		this.$apply_sales_order = this.$component.find('.apply-sales-order');
 	}
 
 	make_invoice_fields_control() {
@@ -163,6 +168,35 @@ erpnext.PointOfSale.Payment = class {
 				!me.selected_mode?.get_value() ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
 			}
 		})
+		this.$apply_sales_order.change(function(e) {
+			if(this.checked) {
+				let d = new frappe.ui.Dialog({
+					title: 'Production details',
+					fields: [
+						{
+							label: 'Delivery Date ',
+							fieldname: 'delivery_date',
+							fieldtype: 'Date',
+							default: me.$delivery_date || frappe.datetime.nowdate()
+						},
+						{
+							label: 'Production Note',
+							fieldname: 'production_note',
+							fieldtype: 'Small Text',
+							default: me.$production_note || ''
+						}
+					],
+					primary_action_label: 'Apply',
+					primary_action(values) {
+						me.$production_note = values.production_note;
+						me.$delivery_date = values.delivery_date;
+						d.hide();
+					}
+				});
+				
+				d.show();
+			}
+		})
 
 		this.$payment_modes.on('click', '.shortcut', function(e) {
 			const value = $(this).attr('data-value');
@@ -177,6 +211,7 @@ erpnext.PointOfSale.Payment = class {
 			const doc = this.events.get_frm().doc;
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
+			this.$apply_sales_order = this.$component.find('.apply-sales-order:checked').length > 0;
 
 			if (paid_amount == 0 || !items.length) {
 				const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.")
@@ -276,10 +311,12 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	checkout() {
+		this.$production_note = '';
+		this.$delivery_date = frappe.datetime.nowdate();
 		this.events.toggle_other_sections(true);
 		this.toggle_component(true);
-
 		this.render_payment_section();
+		this.$component.find('.apply-sales-order').prop('checked', false);
 	}
 
 	toggle_remarks_control() {

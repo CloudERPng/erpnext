@@ -22,6 +22,5 @@
 	{% set label = "Service" %}
 {% endif %}
 
+<a href="https://clouderp.one" target="_blank" class="text-muted">Powered by CloudERP - {{ '' if domains else 'Open Source' }} ERP Software {{ ('for ' + domains[0].domain + ' Companies') if domains else '' }}</a>
 
-
-<a href="https://erpnext.com{{ link }}?source=website_footer" target="_blank" class="text-muted">Powered by ERPNext - {{ '' if domains else 'Open Source' }} ERP Software {{ ('for ' + label + ' Companies') if domains else '' }}</a>
