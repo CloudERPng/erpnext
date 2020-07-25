@@ -338,6 +338,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.events.close_item_details();
 		});
 		this.$component.on('click', '.variant-btn', () => {
+			frappe.dom.freeze();
 			this.events.get_item_variants();
 		});
 	}
