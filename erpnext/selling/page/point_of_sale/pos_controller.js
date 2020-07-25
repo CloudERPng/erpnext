@@ -374,6 +374,10 @@ erpnext.PointOfSale.Controller = class {
 				const d = new frappe.ui.Dialog({
 					title: __(variant_of),
 				});
+				d.$wrapper.on("hide.bs.modal", function() {
+					frappe.dom.unfreeze();
+				});
+
 				d.$wrapper.find('.modal-dialog').css('width', '50%');
 				const res = await frappe.call({
 					method: "erpnext.selling.page.point_of_sale.point_of_sale.get_item_attributes",
@@ -468,13 +472,15 @@ erpnext.PointOfSale.Controller = class {
 					me.cart.prev_action = undefined;
 					me.cart.toggle_item_highlight();
 					cur_frm.rec_dialog.hide();
+					frappe.dom.unfreeze();
 				})
 
 				cur_frm.rec_dialog = d;
-				d.show();  
+				d.show(); 
 			});
 		}
 	}
+	
 	async get_variants_items(item_code, attr_list) {
 		if (!this.price_list) {
             const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
