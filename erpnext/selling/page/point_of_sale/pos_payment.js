@@ -25,7 +25,11 @@ erpnext.PointOfSale.Payment = class {
 					</div>
 					<div class="payment-modes flex flex-wrap"></div>
 					<div class="invoice-details-section"></div>
-                    <div class="flex mt-auto justify-center w-full">
+					<div calss="checkbox flex">
+						<input type="checkbox" class="apply-sales-order input-with-feedback" data-fieldtype="Check"</input>
+						<span class="label-area">Create Sales Order</span>
+					</div>
+					<div class="flex mt-auto justify-center w-full">
                         <div class="flex flex-col justify-center flex-1 ml-4">
                             <div class="flex w-full">
                                 <div class="totals-remarks items-end justify-end flex flex-1">
@@ -177,7 +181,7 @@ erpnext.PointOfSale.Payment = class {
 			const doc = this.events.get_frm().doc;
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
-
+			this.$apply_sales_order = this.$component.find('.apply-sales-order:checked').length > 0;
 			if (paid_amount == 0 || !items.length) {
 				const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.")
 				frappe.show_alert({ message, indicator: "orange" });

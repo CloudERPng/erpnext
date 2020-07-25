@@ -12,6 +12,7 @@
   "customer",
   "customer_name",
   "tax_id",
+  "apply_sales_order",
   "is_pos",
   "pos_profile",
   "offline_pos_name",
@@ -1575,12 +1576,18 @@
    "label": "Consolidated Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
+},
+{
+ "default": "0",
+ "fieldname": "apply_sales_order",
+ "fieldtype": "Check",
+ "label": "Apply Sales Order"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 15:08:39.337385",
+ "modified": "2020-07-25 14:00:00.319711",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
