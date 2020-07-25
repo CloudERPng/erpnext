@@ -47,6 +47,8 @@ class POSInvoice(SalesInvoice):
 		self.validate_pos()
 		self.verify_payment_amount()
 		self.validate_loyalty_transaction()
+		if self.apply_sales_order == 1:
+			self.update_stock = 0
 
 
 	def on_submit(self):
