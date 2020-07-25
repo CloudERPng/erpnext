@@ -27,7 +27,7 @@ erpnext.PointOfSale.Payment = class {
 					<div class="invoice-details-section"></div>
 					<div calss="checkbox flex">
 						<input type="checkbox" class="apply-sales-order input-with-feedback" data-fieldtype="Check"</input>
-						<span class="label-area">Create Sales Order</span>
+						<span class="label-area">Send for Production</span>
 					</div>
 					<div class="flex mt-auto justify-center w-full">
                         <div class="flex flex-col justify-center flex-1 ml-4">
