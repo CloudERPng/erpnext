@@ -15,6 +15,7 @@
   "column_break_9",
   "update_stock",
   "hide_variants",
+  "allow_send_for_production",
   "ignore_pricing_rule",
   "warehouse",
   "campaign",
@@ -297,6 +298,12 @@
  "fieldname": "hide_variants",
  "fieldtype": "Check",
  "label": "Hide Variants"
+},
+{
+ "default": "0",
+ "fieldname": "allow_send_for_production",
+ "fieldtype": "Check",
+ "label": "Allow Send for Production"
   },
   {
    "fieldname": "print_format",
@@ -330,7 +337,7 @@
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-07-25 12:20:30.977272",
+ "modified": "2020-07-25 14:20:30.977272",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
