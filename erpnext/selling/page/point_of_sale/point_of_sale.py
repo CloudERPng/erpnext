@@ -7,6 +7,8 @@ from frappe.utils.nestedset import get_root_of
 from frappe.utils import cint
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
+from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
+from collections import Counter
 
 from six import string_types
 
@@ -31,7 +33,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	barcode = data.get("barcode") if data.get("barcode") else ""
 
 	condition = get_conditions(item_code, serial_no, batch_no, barcode)
-
+	conditions = " AND variant_of IS NULL"
 	if pos_profile:
 		condition += get_item_group_condition(pos_profile)
 
@@ -48,16 +50,18 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			stock_uom,
 			image AS item_image,
 			idx AS idx,
+			variant_of,
+			has_variants,
 			is_stock_item
 		FROM
 			`tabItem`
 		WHERE
 			disabled = 0
-				AND has_variants = 0
 				AND is_sales_item = 1
 				AND is_fixed_asset = 0
 				AND item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
 				AND {condition}
+				{conditions}
 		ORDER BY
 			name asc
 		LIMIT
@@ -67,7 +71,8 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			page_length=page_length,
 			lft=lft,
 			rgt=rgt,
-			condition=condition
+			condition=condition,
+			conditions=conditions
 		), as_dict=1)
 
 	if items_data:
@@ -248,3 +253,121 @@ def set_customer_info(fieldname, customer, value=""):
 			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
 			frappe.db.set_value('Customer', customer, 'mobile_no', value)
 		contact_doc.save()
+
+
+
+
+@frappe.whitelist()
+def get_item_attributes(item_code):
+	attributes = frappe.db.get_all('Item Variant Attribute',
+		fields=['attribute'],
+		filters={
+			'parenttype': 'Item',
+			'parent': item_code
+		},
+		order_by='idx asc'
+	)
+
+	optional_attributes = ItemVariantsCacheManager(item_code).get_optional_attributes()
+
+	for a in attributes:
+		values = frappe.db.get_all('Item Attribute Value',
+		fields=['attribute_value','abbr'],
+		filters={
+				'parenttype': 'Item Attribute',
+				'parent': a.attribute
+			},
+			order_by='idx asc'
+		)
+		a.values = values
+		if a.attribute in optional_attributes:
+			a.optional = True
+
+
+	return attributes
+
+
+
+@frappe.whitelist()
+def get_items_has_attribute(item_code, price_list, pos_profile, attr_list=None):
+	conditions = " AND IT.variant_of = '%s'" % item_code
+	query = """
+				SELECT
+					IT.name AS item_code,
+					IT.item_name,
+					IT.description,
+					IT.stock_uom,
+					IT.image AS item_image,
+					IT.idx AS idx,
+					IT.variant_of,
+					IT.has_variants,
+					IT.is_stock_item,
+					IVA.attribute_value,
+					IVA.attribute
+				FROM `tabItem` AS IT 
+					INNER JOIN `tabItem Variant Attribute` AS IVA ON IVA.parent = IT.name
+				WHERE                  
+					disabled = 0
+					AND is_sales_item = 1
+					AND is_fixed_asset = 0
+					%s 
+				ORDER BY IT.name asc
+			"""%(conditions)
+	items_data = frappe.db.sql(query,as_dict=True)
+
+	items = []
+	items_list = []
+	result = []
+
+	if attr_list:
+		attr_list = json.loads(attr_list)
+		for i in items_data:
+			for e in attr_list:
+				if i["attribute"] == e["attribute"] and i["attribute_value"] == e["attribute_value"]:
+					items.append(i["item_code"])
+					if dict(Counter(items))[i.item_code] == len(attr_list):
+						items_list.append(i)
+
+		items_data = items_list
+	else :
+		for i in items_data:
+			if i["item_code"] not in items:
+				items.append(i["item_code"])
+				items_list.append(i)
+		items_data = items_list
+
+	if items_data:
+		warehouse = ""
+		display_items_in_stock = 0
+
+		if pos_profile:
+			warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
+
+		items = [d.item_code for d in items_data]
+		item_prices_data = frappe.get_all("Item Price",
+			fields = ["item_code", "price_list_rate", "currency"],
+			filters = {'price_list': price_list, 'item_code': ['in', items]})
+
+		item_prices = {}
+		for d in item_prices_data:
+			item_prices[d.item_code] = d
+
+		for item in items_data:
+				item_code = item.item_code
+				item_price = item_prices.get(item_code) or {}
+				item_stock_qty = get_stock_availability(item_code, warehouse)
+
+				if display_items_in_stock and not item_stock_qty:
+					pass
+				else:
+					row = {}
+					row.update(item)
+					row.update({
+						'price_list_rate': item_price.get('price_list_rate'),
+						'currency': item_price.get('currency'),
+						'actual_qty': item_stock_qty,
+					})
+					result.append(row)
+
+
+	return result 

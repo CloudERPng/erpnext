@@ -75,7 +75,7 @@ erpnext.PointOfSale.ItemSelector = class {
     }
 
     get_item_html(item) {
-        const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
+        const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, variant_of, has_variants } = item;
         const indicator_color = actual_qty > 10 ? "green" : actual_qty !== 0 ? "orange" : "red";
 
         function get_item_image_html() {
@@ -93,6 +93,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		return (
             `<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}"
                 data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+                data-variant-of="${escape(variant_of)}" data-has-variants="${escape(has_variants)}"
                 title="Avaiable Qty: ${actual_qty}">
                 ${get_item_image_html()}
                 <div class="flex items-center pr-4 pl-4 h-10 justify-between">
@@ -165,13 +166,22 @@ erpnext.PointOfSale.ItemSelector = class {
             let batch_no = unescape($item.attr('data-batch-no'));
             let serial_no = unescape($item.attr('data-serial-no'));
             let uom = unescape($item.attr('data-uom'));
-            
+            let variant_of = unescape($item.attr('data-variant-of'));
+            let has_variants = unescape($item.attr('data-has-variants'));
+
             // escape(undefined) returns "undefined" then unescape returns "undefined"
             batch_no = batch_no === "undefined" ? undefined : batch_no;
             serial_no = serial_no === "undefined" ? undefined : serial_no;
             uom = uom === "undefined" ? undefined : uom;
+            variant_of = variant_of === "undefined" ? undefined : variant_of;
+            has_variants = has_variants === "undefined" ? undefined : has_variants;
+            if (has_variants == 1) {
+                me.events.get_item_variants(item_code);
+            }
+            else {
+                me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}});
+            }
 
-            me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
         })
 
         this.search_field.$input.on('input', (e) => {
