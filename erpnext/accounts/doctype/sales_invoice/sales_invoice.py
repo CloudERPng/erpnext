@@ -345,7 +345,7 @@ class SalesInvoice(SellingController):
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
-		print_format = pos.get("print_format") if pos else None
+		print_format = pos.get("print_format_for_online") if pos else None
 		if not print_format and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):
 			print_format = 'POS Invoice'
 
@@ -418,6 +418,8 @@ class SalesInvoice(SellingController):
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
+			self.allow_print_before_pay = pos.allow_print_before_pay
+
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
@@ -428,8 +430,8 @@ class SalesInvoice(SellingController):
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
-			for fieldname in ('naming_series', 'currency', 'letter_head', 'tc_name',
-				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
+			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
+				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
@@ -786,8 +788,7 @@ class SalesInvoice(SellingController):
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center,
-					"project": self.project
+					"cost_center": self.cost_center
 				}, self.party_account_currency, item=self)
 			)
 
@@ -842,8 +843,7 @@ class SalesInvoice(SellingController):
 							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
 								if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center,
-							"project": item.project or self.project
+							"cost_center": item.cost_center
 						}, account_currency, item=item)
 					)
 
@@ -924,8 +924,7 @@ class SalesInvoice(SellingController):
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype,
-						"cost_center": self.cost_center,
-						"project": self.project
+						"cost_center": self.cost_center
 					}, self.party_account_currency, item=self)
 				)
 
@@ -958,8 +957,7 @@ class SalesInvoice(SellingController):
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center,
-					"project": self.project
+					"cost_center": self.cost_center
 				}, self.party_account_currency, item=self)
 			)
 			gl_entries.append(
@@ -1109,10 +1107,7 @@ class SalesInvoice(SellingController):
 			expiry_date=self.posting_date, include_expired_entry=True)
 		if lp_details and getdate(lp_details.from_date) <= getdate(self.posting_date) and \
 			(not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date)):
-
-			collection_factor = lp_details.collection_factor if lp_details.collection_factor else 1.0
-			points_earned = cint(eligible_amount/collection_factor)
-
+			points_earned = cint(eligible_amount/lp_details.collection_factor)
 			doc = frappe.get_doc({
 				"doctype": "Loyalty Point Entry",
 				"company": self.company,
@@ -1169,9 +1164,7 @@ class SalesInvoice(SellingController):
 
 		points_to_redeem = self.loyalty_points
 		for lp_entry in loyalty_point_entries:
-			if lp_entry.invoice_type != self.doctype or lp_entry.invoice == self.name:
-				# redeemption should be done against same doctype
-				# also it shouldn't be against itself
+			if lp_entry.sales_invoice == self.name:
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			if available_points > points_to_redeem:
@@ -1637,36 +1630,3 @@ def get_mode_of_payment_info(mode_of_payment, company):
 		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
 		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
 	(company, mode_of_payment), as_dict=1)
-
-def create_dunning(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount
-	def set_missing_values(source, target):
-		target.sales_invoice = source_name
-		target.outstanding_amount = source.outstanding_amount
-		overdue_days = (getdate(target.posting_date) - getdate(source.due_date)).days
-		target.overdue_days = overdue_days
-		if frappe.db.exists('Dunning Type', {'start_day': [
-	                                '<', overdue_days], 'end_day': ['>=', overdue_days]}):
-			dunning_type = frappe.get_doc('Dunning Type', {'start_day': [
-	                                '<', overdue_days], 'end_day': ['>=', overdue_days]})
-			target.dunning_type = dunning_type.name
-			target.rate_of_interest = dunning_type.rate_of_interest
-			target.dunning_fee = dunning_type.dunning_fee
-			letter_text = get_dunning_letter_text(dunning_type = dunning_type.name, doc = target.as_dict())
-			if letter_text:
-				target.body_text = letter_text.get('body_text')
-				target.closing_text = letter_text.get('closing_text')
-				target.language = letter_text.get('language')
-			amounts = calculate_interest_and_amount(target.posting_date, target.outstanding_amount,
-				target.rate_of_interest, target.dunning_fee, target.overdue_days)
-			target.interest_amount = amounts.get('interest_amount')
-			target.dunning_amount = amounts.get('dunning_amount')
-			target.grand_total = amounts.get('grand_total')
-
-	doclist = get_mapped_doc("Sales Invoice", source_name,	{
-		"Sales Invoice": {
-			"doctype": "Dunning",
-		}
-	}, target_doc, set_missing_values)
-	return doclist

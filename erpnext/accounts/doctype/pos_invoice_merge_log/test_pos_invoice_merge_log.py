@@ -14,7 +14,11 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 	def test_consolidated_invoice_creation(self):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 
+<<<<<<< HEAD
 		test_user, pos_profile = init_user_and_profile()
+=======
+		old_user, test_user, pos_profile = init_user_and_profile()
+>>>>>>> develop
 
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append('payments', {
@@ -44,14 +48,21 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 
 		self.assertFalse(pos_inv.consolidated_invoice == pos_inv3.consolidated_invoice)
 
+<<<<<<< HEAD
 		frappe.set_user("Administrator")
+=======
+>>>>>>> develop
 		frappe.db.sql("delete from `tabPOS Profile`")
 		frappe.db.sql("delete from `tabPOS Invoice`")
 	
 	def test_consolidated_credit_note_creation(self):
 		frappe.db.sql("delete from `tabPOS Invoice`")
 
+<<<<<<< HEAD
 		test_user, pos_profile = init_user_and_profile()
+=======
+		old_user, test_user, pos_profile = init_user_and_profile()
+>>>>>>> develop
 
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append('payments', {
@@ -91,7 +102,10 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv_cn.consolidated_invoice))
 		self.assertTrue(frappe.db.get_value("Sales Invoice", pos_inv_cn.consolidated_invoice, "is_return"))
 
+<<<<<<< HEAD
 		frappe.set_user("Administrator")
+=======
+>>>>>>> develop
 		frappe.db.sql("delete from `tabPOS Profile`")
 		frappe.db.sql("delete from `tabPOS Invoice`")
 

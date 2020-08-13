@@ -68,6 +68,7 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(inv.grand_total, 4900.00)
 	
 	def test_tax_calculation_with_multiple_items(self):
+<<<<<<< HEAD
 		inv = create_pos_invoice(qty=84, rate=4.6, do_not_save=True)
 		item_row = inv.get("items")[0]
 		for qty in (54, 288, 144, 430):
@@ -76,6 +77,16 @@ class TestPOSInvoice(unittest.TestCase):
 			inv.append("items", item_row_copy)
 
 		inv.append("taxes", {
+=======
+		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
+		item_row = si.get("items")[0]
+		for qty in (54, 288, 144, 430):
+			item_row_copy = copy.deepcopy(item_row)
+			item_row_copy.qty = qty
+			si.append("items", item_row_copy)
+
+		si.append("taxes", {
+>>>>>>> develop
 			"account_head": "_Test Account VAT - _TC",
 			"charge_type": "On Net Total",
 			"cost_center": "_Test Cost Center - _TC",
@@ -83,6 +94,7 @@ class TestPOSInvoice(unittest.TestCase):
 			"doctype": "Sales Taxes and Charges",
 			"rate": 19
 		})
+<<<<<<< HEAD
 		inv.insert()
 
 		self.assertEqual(inv.net_total, 4600)
@@ -91,6 +103,16 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(inv.get("taxes")[0].total, 5474.0)
 
 		self.assertEqual(inv.grand_total, 5474.0)
+=======
+		si.insert()
+
+		self.assertEqual(si.net_total, 4600)
+
+		self.assertEqual(si.get("taxes")[0].tax_amount, 874.0)
+		self.assertEqual(si.get("taxes")[0].total, 5474.0)
+
+		self.assertEqual(si.grand_total, 5474.0)
+>>>>>>> develop
 
 	def test_tax_calculation_with_item_tax_template(self):
 		inv = create_pos_invoice(qty=84, rate=4.6, do_not_save=1)
@@ -196,12 +218,21 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get('payments')[1].amount, -500)
 	
 	def test_pos_change_amount(self):
+<<<<<<< HEAD
 		pos = create_pos_invoice(company= "_Test Company", debit_to="Debtors - _TC",
 			income_account = "Sales - _TC", expense_account = "Cost of Goods Sold - _TC", rate=105,
 			cost_center = "Main - _TC", do_not_save=True)
 
 		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 50})
 		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 60})
+=======
+		pos = create_pos_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", rate=105,
+			cost_center = "Main - TCP1", do_not_save=True)
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 50})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 60})
+>>>>>>> develop
 
 		pos.insert()
 		pos.submit()
@@ -212,7 +243,10 @@ class TestPOSInvoice(unittest.TestCase):
 	def test_without_payment(self):
 		inv = create_pos_invoice(do_not_save=1)
 		# Check that the invoice cannot be submitted without payments
+<<<<<<< HEAD
 		inv.payments = []
+=======
+>>>>>>> develop
 		self.assertRaises(frappe.ValidationError, inv.insert)
 	
 	def test_serialized_item_transaction(self):

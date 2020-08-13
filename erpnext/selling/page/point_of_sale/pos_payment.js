@@ -29,7 +29,11 @@ erpnext.PointOfSale.Payment = class {
 						<input type="checkbox" class="apply-sales-order input-with-feedback" data-fieldtype="Check"</input>
 						<span class="label-area">Send for Production</span>
 					</div>
+<<<<<<< HEAD
 					<div class="flex mt-auto justify-center w-full">
+=======
+                    <div class="flex mt-auto justify-center w-full">
+>>>>>>> develop
                         <div class="flex flex-col justify-center flex-1 ml-4">
                             <div class="flex w-full">
                                 <div class="totals-remarks items-end justify-end flex flex-1">
@@ -193,10 +197,18 @@ erpnext.PointOfSale.Payment = class {
 						d.hide();
 					}
 				});
+<<<<<<< HEAD
 
 				d.show();
 			}
 		})
+=======
+				
+				d.show();
+			}
+		})
+
+>>>>>>> develop
 		this.$payment_modes.on('click', '.shortcut', function(e) {
 			const value = $(this).attr('data-value');
 			me.selected_mode.set_value(value);
@@ -211,6 +223,10 @@ erpnext.PointOfSale.Payment = class {
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
 			this.$apply_sales_order = this.$component.find('.apply-sales-order:checked').length > 0;
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 			if (paid_amount == 0 || !items.length) {
 				const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.")
 				frappe.show_alert({ message, indicator: "orange" });

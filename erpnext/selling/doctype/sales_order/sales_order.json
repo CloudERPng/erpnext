@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_workflow": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
  "doctype": "DocType",
@@ -931,7 +930,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words (Company Currency)",
-   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -990,7 +988,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words",
-   "length": 240,
    "oldfieldname": "in_words_export",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -1457,25 +1454,25 @@
    "hide_seconds": 1,
    "label": "Skip Delivery Note",
    "print_hide": 1
-},
-{
- "collapsible": 1,
- "fieldname": "production_note_section",
- "fieldtype": "Section Break",
- "label": "Production Note"
-},
-{
- "fieldname": "production_note",
- "fieldtype": "Small Text",
- "label": "Production Note",
- "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "production_note_section",
+   "fieldtype": "Section Break",
+   "label": "Production Note"
+  },
+  {
+   "fieldname": "production_note",
+   "fieldtype": "Small Text",
+   "label": "Production Note",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-25 15:13:06.680696",
+ "modified": "2020-07-15 21:47:13.863716",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

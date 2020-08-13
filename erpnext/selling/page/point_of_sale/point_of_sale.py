@@ -166,7 +166,6 @@ def get_item_group_condition(pos_profile):
 
 	return cond % tuple(item_groups)
 
-@frappe.whitelist()
 def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 	item_groups = []
 	cond = "1=1"
@@ -337,14 +336,14 @@ def get_items_has_attribute(item_code, price_list, pos_profile, attr_list=None):
 				items.append(i["item_code"])
 				items_list.append(i)
 		items_data = items_list
-
+	
 	if items_data:
 		warehouse = ""
 		display_items_in_stock = 0
 
 		if pos_profile:
 			warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
-
+		
 		items = [d.item_code for d in items_data]
 		item_prices_data = frappe.get_all("Item Price",
 			fields = ["item_code", "price_list_rate", "currency"],
@@ -370,6 +369,6 @@ def get_items_has_attribute(item_code, price_list, pos_profile, attr_list=None):
 						'actual_qty': item_stock_qty,
 					})
 					result.append(row)
-
-
-	return result 
+	
+	
+	return result

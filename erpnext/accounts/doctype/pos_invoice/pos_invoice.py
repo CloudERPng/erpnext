@@ -49,7 +49,11 @@ class POSInvoice(SalesInvoice):
 		self.validate_loyalty_transaction()
 		if self.apply_sales_order == 1:
 			self.update_stock = 0
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> develop
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -63,7 +67,11 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.set_status(update=True)
 		self.check_sales_order()
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> develop
 	def check_sales_order(self):
 		if self.apply_sales_order == 1 and self.docstatus == 1:
 			sales_order_doc = make_sales_order(self.name)
@@ -82,7 +90,11 @@ class POSInvoice(SalesInvoice):
 					self.items[i].so_detail =  item.name
 					i += 1
 				self.save()
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> develop
 	def on_cancel(self):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
@@ -255,6 +267,11 @@ class POSInvoice(SalesInvoice):
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
+<<<<<<< HEAD
+=======
+			self.allow_print_before_pay = pos.allow_print_before_pay
+
+>>>>>>> develop
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
@@ -267,8 +284,13 @@ class POSInvoice(SalesInvoice):
 			if pos.get('warehouse'):
 				self.set_warehouse = pos.get('warehouse')
 
+<<<<<<< HEAD
 			for fieldname in ('naming_series', 'currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
+=======
+			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
+				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
+>>>>>>> develop
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
@@ -318,7 +340,11 @@ class POSInvoice(SalesInvoice):
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
+<<<<<<< HEAD
 		print_format = pos.get("print_format") if pos else None
+=======
+		print_format = pos.get("print_format_for_online") if pos else None
+>>>>>>> develop
 		if not print_format and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):
 			print_format = 'POS Invoice'
 
@@ -400,6 +426,7 @@ def make_merge_log(invoices):
 
 
 def make_sales_order(source_name, target_doc=None):
+<<<<<<< HEAD
 	# quotation = frappe.db.get_value("POS Invoice", source_name, ["transaction_date", "valid_till"], as_dict = 1)
 	return _make_sales_order(source_name, target_doc)
 
@@ -413,6 +440,13 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		# if source.referral_sales_partner:
 		# 	target.sales_partner=source.referral_sales_partner
 		# 	target.commission_rate=frappe.get_value('Sales Partner', source.referral_sales_partner, 'commission_rate')
+=======
+	return _make_sales_order(source_name, target_doc)
+
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
+
+	def set_missing_values(source, target):
+>>>>>>> develop
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -421,11 +455,14 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
+<<<<<<< HEAD
 		# if obj.against_blanket_order:
 		# 	target.against_blanket_order = obj.against_blanket_order
 		# 	target.blanket_order = obj.blanket_order
 		# 	target.blanket_order_rate = obj.blanket_order_rate
 
+=======
+>>>>>>> develop
 	doclist = get_mapped_doc("POS Invoice", source_name, {
 			"POS Invoice": {
 				"doctype": "Sales Order",
@@ -455,6 +492,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
+<<<<<<< HEAD
 	# postprocess: fetch shipping address, set missing values
 
+=======
+>>>>>>> develop
 	return doclist

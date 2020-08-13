@@ -43,7 +43,11 @@ erpnext.PointOfSale.ItemDetails = class {
 				<div class="variant-btn bg-green-200 border-grey mt-6 flex items-center justify-center h-16 pr-8 pl-8 text-center no-select pointer rounded-b text-md text-bold">
 					Get Variants
 				</div>
+<<<<<<< HEAD
 				</div>`
+=======
+			</div>`
+>>>>>>> develop
 		)
 
 		this.$item_name = this.$component.find('.item-name');
@@ -56,7 +60,11 @@ erpnext.PointOfSale.ItemDetails = class {
     }
 
     toggle_item_details_section(item) {
+<<<<<<< HEAD
 		const { item_code, batch_no, uom, variant_of, has_variants} = this.current_item;
+=======
+		const { item_code, batch_no, uom, variant_of, has_variants} = this.current_item; 
+>>>>>>> develop
 		const item_code_is_same = item && item_code === item.item_code;
 		const batch_is_same = item && batch_no == item.batch_no;
 		const uom_is_same = item && uom === item.uom;
@@ -73,7 +81,11 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.item_row = item;
             this.currency = this.events.get_frm().doc.currency;
             
+<<<<<<< HEAD
             this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom, variant_of: item.variant_of, has_variants: item.has_variants };
+=======
+			this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom, variant_of: item.variant_of, has_variants: item.has_variants };
+>>>>>>> develop
 			this.render_dom(item);
 			this.render_discount_dom(item);
 			this.render_form(item);

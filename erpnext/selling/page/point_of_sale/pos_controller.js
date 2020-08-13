@@ -249,7 +249,11 @@ erpnext.PointOfSale.Controller = class {
 				get_item_variants: async (item_code) => this.get_item_variants(item_code)
 			}
 		})
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> develop
 	}
 
 	init_item_cart() {
@@ -365,7 +369,11 @@ erpnext.PointOfSale.Controller = class {
 		}
 		else {
 			current_item = this.item_details.current_item;
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> develop
 			variant_of = this.item_details.current_item.variant_of;
 		}
 		if (variant_of != "null"){
@@ -377,7 +385,11 @@ erpnext.PointOfSale.Controller = class {
 				d.$wrapper.on("hide.bs.modal", function() {
 					frappe.dom.unfreeze();
 				});
+<<<<<<< HEAD
 
+=======
+				
+>>>>>>> develop
 				d.$wrapper.find('.modal-dialog').css('width', '50%');
 				const res = await frappe.call({
 					method: "erpnext.selling.page.point_of_sale.point_of_sale.get_item_attributes",
@@ -395,7 +407,11 @@ erpnext.PointOfSale.Controller = class {
 					</div>
 				</div>`).appendTo(d.body);
 				const attr_sections = $(d.body).find('.attr-section');
+<<<<<<< HEAD
 
+=======
+				
+>>>>>>> develop
 				res.message.forEach(i => {
 					const atrr = $(`<div class="atrr grid grid-cols-5 gap-1 mb-4"></div>`).appendTo(attr_sections);
 					i.values.forEach(e => {
@@ -414,7 +430,11 @@ erpnext.PointOfSale.Controller = class {
 						$(element).removeClass('shadow-inner bg-selected');
 					});
 					$(btn).toggleClass('shadow-inner bg-selected');
+<<<<<<< HEAD
 
+=======
+					
+>>>>>>> develop
 					let selected_btns = $(d.body).find('.bg-selected') 
 					let attr_list = [];
 					selected_btns.each(function (i,btn) {
@@ -423,6 +443,7 @@ erpnext.PointOfSale.Controller = class {
 							attribute_value : btn.getAttribute('data-attr-value')
 						})
 					});
+<<<<<<< HEAD
 
 					if (attr_list.length == 0) {attr_list = null}
 					items_has_attribute = await this.get_variants_items(variant_of, attr_list);
@@ -431,10 +452,21 @@ erpnext.PointOfSale.Controller = class {
 					items_section = $(d.body).find('.items-section');
 					items_section.html('');
 
+=======
+			
+					if (attr_list.length == 0) {attr_list = null}
+					items_has_attribute = await this.get_variants_items(variant_of, attr_list);
+					
+					
+					items_section = $(d.body).find('.items-section');
+					items_section.html('');
+			
+>>>>>>> develop
 					items_has_attribute.message.forEach(item => {
 						const item_html = this.get_item_html(item);
 						items_section.append(item_html);
 					})
+<<<<<<< HEAD
 
 				});
 				let items_has_attribute = await this.get_variants_items(variant_of);
@@ -442,6 +474,15 @@ erpnext.PointOfSale.Controller = class {
 				let items_section = $(d.body).find('.items-section');
 					items_section.html('');
 
+=======
+					
+				});
+				let items_has_attribute = await this.get_variants_items(variant_of);
+				
+				let items_section = $(d.body).find('.items-section');
+					items_section.html('');
+			
+>>>>>>> develop
 					items_has_attribute.message.forEach(item => {
 						const item_html = this.get_item_html(item);
 						items_section.append(item_html);
@@ -459,15 +500,25 @@ erpnext.PointOfSale.Controller = class {
 					let uom = unescape($item.attr('data-uom'));
 					let variant_of = unescape($item.attr('data-variant-of'));
 					let has_variants = unescape($item.attr('data-has-variants'));
+<<<<<<< HEAD
 
+=======
+					
+>>>>>>> develop
 					batch_no = batch_no === "undefined" ? undefined : batch_no;
 					serial_no = serial_no === "undefined" ? undefined : serial_no;
 					uom = uom === "undefined" ? undefined : uom;
 					variant_of = variant_of === "undefined" ? undefined : variant_of;
 					has_variants = has_variants === "undefined" ? undefined : has_variants;
+<<<<<<< HEAD
 
 					me.on_cart_update({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}});
 
+=======
+		
+					me.on_cart_update({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}});
+					
+>>>>>>> develop
 					me.item_details.toggle_item_details_section(undefined);
 					me.cart.prev_action = undefined;
 					me.cart.toggle_item_highlight();
@@ -480,7 +531,11 @@ erpnext.PointOfSale.Controller = class {
 			});
 		}
 	}
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> develop
 	async get_variants_items(item_code, attr_list) {
 		if (!this.price_list) {
             const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
@@ -496,7 +551,11 @@ erpnext.PointOfSale.Controller = class {
 				},
 				async: false,
 			});
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> develop
 	}
 
 
@@ -541,7 +600,11 @@ erpnext.PointOfSale.Controller = class {
             `.cart-item-wrapper${batch_attr}${uom_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}`;
         return $('.cart-items-section').find(item_selector);
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> develop
 	init_payments() {
 		this.payment = new erpnext.PointOfSale.Payment({
 			wrapper: this.$components_wrapper,
@@ -759,7 +822,11 @@ erpnext.PointOfSale.Controller = class {
 			const { item_code, batch_no, serial_no, uom, variant_of, has_variants } = item;
 			let item_row = this.get_item_from_frm(item_code, batch_no, uom);
 
+<<<<<<< HEAD
 			const item_selected_from_selector = field === 'qty'
+=======
+			const item_selected_from_selector = field === 'qty' 
+>>>>>>> develop
 
 			if (item_row) {
 				item_selected_from_selector && (value = item_row.qty + flt(value))

@@ -161,14 +161,22 @@ erpnext.PointOfSale.ItemSelector = class {
         });
 
 		this.$component.on('click', '.item-wrapper', function() {
+<<<<<<< HEAD
 			const $item = $(this);
+=======
+            const $item = $(this);
+>>>>>>> develop
 			const item_code = unescape($item.attr('data-item-code'));
             let batch_no = unescape($item.attr('data-batch-no'));
             let serial_no = unescape($item.attr('data-serial-no'));
             let uom = unescape($item.attr('data-uom'));
             let variant_of = unescape($item.attr('data-variant-of'));
             let has_variants = unescape($item.attr('data-has-variants'));
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> develop
             // escape(undefined) returns "undefined" then unescape returns "undefined"
             batch_no = batch_no === "undefined" ? undefined : batch_no;
             serial_no = serial_no === "undefined" ? undefined : serial_no;
@@ -190,13 +198,21 @@ erpnext.PointOfSale.ItemSelector = class {
                 }
                 me.events.item_selected({ field: 'qty', value: value, item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}});
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> develop
         })
 
         this.search_field.$input.on('input', (e) => {
             clearTimeout(this.last_search);
 			this.last_search = setTimeout(() => {
+<<<<<<< HEAD
 				let search_term
+=======
+                let search_term
+>>>>>>> develop
                 // if (this.barcode_scanned && e.target.value.startsWith('221')){
                 if (e.target.value.startsWith('221')){
                     me.pesokg = '';

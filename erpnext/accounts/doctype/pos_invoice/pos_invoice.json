@@ -1610,7 +1610,11 @@
     "icon": "fa fa-file-text",
     "is_submittable": 1,
     "links": [],
+<<<<<<< HEAD
     "modified": "2020-07-25 15:37:45.558746",
+=======
+    "modified": "2020-07-15 16:37:45.558746",
+>>>>>>> develop
     "modified_by": "Administrator",
     "module": "Accounts",
     "name": "POS Invoice",
@@ -1664,4 +1668,8 @@
     "title_field": "title",
     "track_changes": 1,
     "track_seen": 1
+<<<<<<< HEAD
    } 
+=======
+   }
+>>>>>>> develop

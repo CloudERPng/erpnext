@@ -63,7 +63,11 @@ frappe.ui.form.on('POS Closing Entry', {
 	}
 });
 
+<<<<<<< HEAD
 frappe.ui.form.on('POS Closing Entry Detail', {
+=======
+frappe.ui.form.on('POS Closing Entry Details', {
+>>>>>>> develop
 	closing_amount: (frm, cdt, cdn) => {
 		const row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount))
