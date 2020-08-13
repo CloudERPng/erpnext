@@ -40,6 +40,9 @@ erpnext.PointOfSale.ItemDetails = class {
 				<div class="discount-section flex items-center"></div>
 				<div class="text-grey mt-4 mb-6">STOCK DETAILS</div>
 				<div class="form-container grid grid-cols-2 row-gap-2 col-gap-4 grid-auto-row"></div>
+				<div class="variant-btn bg-green-200 border-grey mt-6 flex items-center justify-center h-16 pr-8 pl-8 text-center no-select pointer rounded-b text-md text-bold">
+					Get Variants
+				</div>
 			</div>`
 		)
 
@@ -49,10 +52,11 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_image = this.$component.find('.item-image');
 		this.$form_container = this.$component.find('.form-container');
 		this.$dicount_section = this.$component.find('.discount-section');
+		this.$variant_btn = this.$component.find('.variant-btn');
     }
 
     toggle_item_details_section(item) {
-		const { item_code, batch_no, uom } = this.current_item; 
+		const { item_code, batch_no, uom, variant_of, has_variants} = this.current_item; 
 		const item_code_is_same = item && item_code === item.item_code;
 		const batch_is_same = item && batch_no == item.batch_no;
 		const uom_is_same = item && uom === item.uom;
@@ -69,8 +73,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.item_row = item;
             this.currency = this.events.get_frm().doc.currency;
             
-            this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom };
-            
+            this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom, variant_of: item.variant_of, has_variants: item.has_variants };
 			this.render_dom(item);
 			this.render_discount_dom(item);
 			this.render_form(item);
@@ -333,6 +336,10 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		this.$component.on('click', '.close-btn', () => {
 			this.events.close_item_details();
+		});
+		this.$component.on('click', '.variant-btn', () => {
+			frappe.dom.freeze();
+			this.events.get_item_variants();
 		});
 	}
 

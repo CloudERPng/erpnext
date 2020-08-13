@@ -246,9 +246,11 @@ erpnext.PointOfSale.Controller = class {
 
 				get_frm: () => this.frm || {},
 
-				get_allowed_item_group: () => this.item_groups
+				get_allowed_item_group: () => this.item_groups,
+				get_item_variants: async (item_code) => this.get_item_variants(item_code)
 			}
 		})
+
 	}
 
 	init_item_cart() {
@@ -303,13 +305,18 @@ erpnext.PointOfSale.Controller = class {
 							return;
 						}
 
-						const { item_code, batch_no, uom } = this.item_details.current_item;
+						const { item_code, batch_no, uom, variant_of, has_variants} = this.item_details.current_item;
 						const event = {
 							field: fieldname,
 							value,
-							item: { item_code, batch_no, uom }
+							item: { item_code, batch_no, uom, variant_of, has_variants }
 						}
 						return this.on_cart_update(event)
+					}
+					if (this.item_details.current_item.variant_of != "null") {
+						$(".variant-btn").show();
+					} else {
+						$(".variant-btn").hide();
 					}
 				},
 
@@ -344,9 +351,197 @@ erpnext.PointOfSale.Controller = class {
 					this.cart.prev_action = undefined;
 					this.cart.toggle_item_highlight();
 				},
-				get_available_stock: (item_code, warehouse) => this.get_available_stock(item_code, warehouse)
+				get_available_stock: (item_code, warehouse) => this.get_available_stock(item_code, warehouse),
+				get_item_variants: async () => this.get_item_variants()
 			}
 		});
+	}
+
+	get_item_variants (selected_item_code) {
+		const me = this;
+		let variant_of
+		let current_item
+		if (selected_item_code) {
+			variant_of = selected_item_code;
+			current_item = null;
+		}
+		else {
+			current_item = this.item_details.current_item;
+
+			variant_of = this.item_details.current_item.variant_of;
+		}
+		if (variant_of != "null"){
+			frappe.db.get_doc("Item", variant_of)
+			.then(async (doc) => {
+				const d = new frappe.ui.Dialog({
+					title: __(variant_of),
+				});
+				d.$wrapper.on("hide.bs.modal", function() {
+					frappe.dom.unfreeze();
+				});
+
+				d.$wrapper.find('.modal-dialog').css('width', '50%');
+				const res = await frappe.call({
+					method: "erpnext.selling.page.point_of_sale.point_of_sale.get_item_attributes",
+					args: {
+						'item_code': variant_of,
+					},
+					async: false,
+				});
+				$(`<div class=" ui-front flex flex-col mt-0 pt-0 mx-h-70 h-100">
+						<div class="attr-section border-b-grey"></div>
+						<div class="flex flex-col scroll-y">
+							<div class="items-section grid grid-cols-3 gap-8 mt-4 p-1"
+						</div>	
+					>
+					</div>
+				</div>`).appendTo(d.body);
+				const attr_sections = $(d.body).find('.attr-section');
+
+				res.message.forEach(i => {
+					const atrr = $(`<div class="atrr grid grid-cols-5 gap-1 mb-4"></div>`).appendTo(attr_sections);
+					i.values.forEach(e => {
+						$(`<div class = "attr-btn mr-4 pointer no-select rounded 
+							flex items-center justify-center h-16 text-md border-grey border"
+							data-attr-value= "${e.attribute_value}" data-attr= "${i.attribute}">
+								${e.attribute_value}
+							</div>`
+						).appendTo(atrr);
+					})
+				})
+				attr_sections.on('click', '.attr-btn', async (event) => {
+					const btn = event.target;
+
+					$(btn).closest('.atrr').find('.bg-selected').not(btn).each(function(i, element) {
+						$(element).removeClass('shadow-inner bg-selected');
+					});
+					$(btn).toggleClass('shadow-inner bg-selected');
+
+					let selected_btns = $(d.body).find('.bg-selected') 
+					let attr_list = [];
+					selected_btns.each(function (i,btn) {
+						attr_list.push({
+							attribute : btn.getAttribute('data-attr'),
+							attribute_value : btn.getAttribute('data-attr-value')
+						})
+					});
+
+					if (attr_list.length == 0) {attr_list = null}
+					items_has_attribute = await this.get_variants_items(variant_of, attr_list);
+
+
+					items_section = $(d.body).find('.items-section');
+					items_section.html('');
+
+					items_has_attribute.message.forEach(item => {
+						const item_html = this.get_item_html(item);
+						items_section.append(item_html);
+					})
+
+				});
+				let items_has_attribute = await this.get_variants_items(variant_of);
+
+				let items_section = $(d.body).find('.items-section');
+					items_section.html('');
+
+					items_has_attribute.message.forEach(item => {
+						const item_html = this.get_item_html(item);
+						items_section.append(item_html);
+					})
+
+				items_section.on('click', '.item-wrapper', function() {
+					if (!selected_item_code) {
+						const $cur_item = me.get_cart_item(current_item);
+						if ($cur_item) {$cur_item.remove();}
+					}
+					const $item = $(this);
+					const item_code = unescape($item.attr('data-item-code'));
+					let batch_no = unescape($item.attr('data-batch-no'));
+					let serial_no = unescape($item.attr('data-serial-no'));
+					let uom = unescape($item.attr('data-uom'));
+					let variant_of = unescape($item.attr('data-variant-of'));
+					let has_variants = unescape($item.attr('data-has-variants'));
+
+					batch_no = batch_no === "undefined" ? undefined : batch_no;
+					serial_no = serial_no === "undefined" ? undefined : serial_no;
+					uom = uom === "undefined" ? undefined : uom;
+					variant_of = variant_of === "undefined" ? undefined : variant_of;
+					has_variants = has_variants === "undefined" ? undefined : has_variants;
+
+					me.on_cart_update({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}});
+
+					me.item_details.toggle_item_details_section(undefined);
+					me.cart.prev_action = undefined;
+					me.cart.toggle_item_highlight();
+					cur_frm.rec_dialog.hide();
+					frappe.dom.unfreeze();
+				})
+
+				cur_frm.rec_dialog = d;
+				d.show();  
+			});
+		}
+	}
+	
+	async get_variants_items(item_code, attr_list) {
+		if (!this.price_list) {
+            const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
+            this.price_list = res.message.selling_price_list;
+        }
+		return frappe.call({
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items_has_attribute",
+				args: {
+					'item_code': item_code,
+					'attr_list': attr_list,
+					'price_list':this.price_list,
+					'pos_profile': this.pos_profile
+				},
+				async: false,
+			});
+
+	}
+
+
+    get_item_html(item) {
+        const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, variant_of, has_variants } = item;
+        const indicator_color = actual_qty > 10 ? "green" : actual_qty !== 0 ? "orange" : "red";
+
+        function get_item_image_html() {
+            if (item_image) {
+                return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+                            <img class="h-full" src="${item_image}" alt="${item_image}" style="object-fit: cover;">
+                        </div>`
+            } else {
+                return `<div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-grey-100">
+                            ${frappe.get_abbr(item.item_name)}
+                        </div>`
+            }
+        }
+
+		return (
+            `<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}"
+                data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+                data-variant-of="${escape(variant_of)}" data-has-variants="${escape(has_variants)}"
+                title="Avaiable Qty: ${actual_qty}">
+                ${get_item_image_html()}
+                <div class="flex items-center pr-4 pl-4 h-10 justify-between">
+                    <div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
+                        <span class="indicator ${indicator_color}"></span>
+                        ${frappe.ellipsis(item.item_name, 18)}
+                    </div>
+                    <div class="f-shrink-0 text-dark-grey text-bold ml-4">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
+                </div>
+            </div>`
+        )
+	}
+
+	get_cart_item({ item_code, batch_no, uom, variant_of, has_variants}) {
+		const batch_attr = `[data-batch-no="${escape(batch_no)}"]`;
+		const item_code_attr = `[data-item-code="${escape(item_code)}"]`;
+		const uom_attr = `[data-uom=${escape(uom)}]`;
+		const item_selector = batch_no ? 
+            `.cart-item-wrapper${batch_attr}${uom_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}`;
+        return $('.cart-items-section').find(item_selector);
 	}
 
 	init_payments() {
@@ -367,6 +562,11 @@ erpnext.PointOfSale.Controller = class {
 				},
 
 				submit_invoice: () => {
+					if (this.payment.$apply_sales_order) {
+						this.frm.doc.apply_sales_order = 1;
+						this.frm.doc.delivery_date = this.payment.$delivery_date;
+						this.frm.doc.production_note = this.payment.$production_note;
+					}
 					this.frm.savesubmit()
 						.then((r) => {
 							// this.set_invoice_status();
@@ -379,6 +579,11 @@ erpnext.PointOfSale.Controller = class {
 							});
 						});
 				}
+			}
+		});
+		frappe.db.get_doc("POS Profile", this.pos_profile).then((profile) => {
+			if (profile.allow_send_for_production != 1) {
+				this.payment.$apply_sales_order.parent().remove();
 			}
 		});
 	}
@@ -553,10 +758,10 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.freeze();
 		try {
 			let { field, value, item } = args;
-			const { item_code, batch_no, serial_no, uom } = item;
+			const { item_code, batch_no, serial_no, uom, variant_of, has_variants } = item;
 			let item_row = this.get_item_from_frm(item_code, batch_no, uom);
 
-			const item_selected_from_selector = field === 'qty' && value === "+1"
+			const item_selected_from_selector = field === 'qty'
 
 			if (item_row) {
 				item_selected_from_selector && (value = item_row.qty + flt(value))
@@ -583,7 +788,7 @@ erpnext.PointOfSale.Controller = class {
 				}
 				item_selected_from_selector && (value = flt(value))
 
-				const args = { item_code, batch_no, [field]: value };
+				const args = { item_code, batch_no, variant_of, has_variants, [field]: value };
 
 				if (serial_no) args['serial_no'] = serial_no;
 

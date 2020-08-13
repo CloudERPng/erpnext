@@ -24,6 +24,8 @@
   "po_no",
   "po_date",
   "tax_id",
+  "production_note_section",
+  "production_note",
   "contact_info",
   "customer_address",
   "address_display",
@@ -1454,13 +1456,25 @@
    "hide_seconds": 1,
    "label": "Skip Delivery Note",
    "print_hide": 1
+},
+{
+ "collapsible": 1,
+ "fieldname": "production_note_section",
+ "fieldtype": "Section Break",
+ "label": "Production Note"
+},
+{
+ "fieldname": "production_note",
+ "fieldtype": "Small Text",
+ "label": "Production Note",
+ "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-31 14:13:17.962015",
+ "modified": "2020-08-13 05:01:17.962015",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
