@@ -39,7 +39,8 @@ frappe.ui.form.on('POS Closing Entry', {
 					frm.add_child("payment_reconciliation", {
 						mode_of_payment: detail.mode_of_payment,
 						opening_amount: detail.opening_amount,
-						expected_amount: detail.opening_amount
+						expected_amount: detail.opening_amount,
+						evacuation_amount: get_total_evacuation(detail.mode_of_payment, frm)
 					});
 				})
 			});
@@ -66,7 +67,7 @@ frappe.ui.form.on('POS Closing Entry', {
 frappe.ui.form.on('POS Closing Entry Detail', {
 	closing_amount: (frm, cdt, cdn) => {
 		const row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount))
+		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount - row.evacuation_amount))
 	}
 })
 
@@ -147,3 +148,21 @@ function set_html_data(frm) {
 		}
 	})
 }
+
+function get_total_evacuation(mode_of_payment, frm) {
+	var evacuation_amount = 0;
+	frappe.call({
+		method: 'erpnext.accounts.doctype.pos_evacuation_entry.pos_evacuation_entry.get_total_evacuation',
+		args: {
+			opening_entry_name: frm.doc.pos_opening_entry,
+			mode_of_payment: mode_of_payment,
+		},
+		async: false,
+		callback: (r) => {
+			evacuation_amount = r.message;
+			console.log(r.message);
+		}
+	})
+	console.log(evacuation_amount);
+	return evacuation_amount;
+}	
