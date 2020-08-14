@@ -160,9 +160,7 @@ function get_total_evacuation(mode_of_payment, frm) {
 		async: false,
 		callback: (r) => {
 			evacuation_amount = r.message;
-			console.log(r.message);
 		}
 	})
-	console.log(evacuation_amount);
 	return evacuation_amount;
 }	
