@@ -34,6 +34,12 @@ class POSClosingEntry(Document):
 		opening_entry.pos_closing_entry = self.name
 		opening_entry.set_status()
 		opening_entry.save()
+		evacuation_entry_list = frappe.get_all("POS Evacuation Entry", filters = {"status":"Open","docstatus":1,"pos_opening_entry":self.pos_opening_entry}, as_list=True)
+		for i in evacuation_entry_list:
+			evacuation_entry = frappe.get_doc("POS Evacuation Entry", i[0])
+			evacuation_entry.pos_closing_entry = self.name
+			evacuation_entry.set_status()
+			evacuation_entry.save()
 
 	def get_payment_reconciliation_details(self):
 		currency = frappe.get_cached_value('Company', self.company,  "default_currency")

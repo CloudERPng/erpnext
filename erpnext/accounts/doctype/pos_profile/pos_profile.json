@@ -17,6 +17,7 @@
   "hide_variants",
   "allow_send_for_production",
   "ignore_pricing_rule",
+  "display_items_in_stock",
   "warehouse",
   "campaign",
   "company_address",
@@ -292,18 +293,18 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
-},
-{
- "default": "0",
- "fieldname": "hide_variants",
- "fieldtype": "Check",
- "label": "Hide Variants"
-},
-{
- "default": "0",
- "fieldname": "allow_send_for_production",
- "fieldtype": "Check",
- "label": "Allow Send for Production"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_variants",
+   "fieldtype": "Check",
+   "label": "Hide Variants"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_send_for_production",
+   "fieldtype": "Check",
+   "label": "Allow Send for Production"
   },
   {
    "fieldname": "print_format",
@@ -332,13 +333,18 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule"
+  },
+  {
+   "default": "0",
+   "fieldname": "display_items_in_stock",
+   "fieldtype": "Check",
+   "label": "Display Items In Stock"
   }
-  
  ],
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-08-13 06:45:30.977272",
+ "modified": "2020-08-14 01:15:43.302238",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
