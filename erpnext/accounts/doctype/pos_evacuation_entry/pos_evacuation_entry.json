@@ -142,7 +142,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-14 05:00:31.003292",
+ "modified": "2020-08-14 15:47:06.179929",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Evacuation Entry",
@@ -217,7 +217,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

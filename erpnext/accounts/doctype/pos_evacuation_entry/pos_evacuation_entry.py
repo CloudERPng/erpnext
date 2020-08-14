@@ -13,10 +13,6 @@ class POSEvacuationEntry(StatusUpdater):
 	def validate(self):
 		self.validate_pos_profile_and_cashier()
 		self.set_status()
-	
-	def onload(self):
-		frappe.msgprint(str(get_total_evacuation(self.pos_opening_entry, self.mode_of_payment)))
-
 
 	def validate_pos_profile_and_cashier(self):
 		if self.company != frappe.db.get_value("POS Profile", self.pos_profile, "company"):
