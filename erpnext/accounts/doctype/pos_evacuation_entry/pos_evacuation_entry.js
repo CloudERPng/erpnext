@@ -9,6 +9,8 @@ frappe.ui.form.on('POS Evacuation Entry', {
 		frm.set_query("pos_opening_entry", function(doc) {
 			return { filters: { 'status': 'Open', 'docstatus': 1 } };
 		});
-		
+		frm.set_query("mode_of_payment", function(doc) {
+			return { filters: { 'type': 'Cash' } };
+		});
 	},
 });

@@ -18,6 +18,8 @@
   "user",
   "section_break_8",
   "cash_amount",
+  "column_break_13",
+  "mode_of_payment",
   "amended_from"
  ],
  "fields": [
@@ -34,6 +36,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "POS Opening Entry",
+   "no_copy": 1,
    "options": "POS Opening Entry",
    "reqd": 1
   },
@@ -47,21 +50,26 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Company",
+   "no_copy": 1,
    "options": "Company",
    "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "no_copy": 1
   },
   {
    "fetch_from": "pos_opening_entry.pos_profile",
    "fieldname": "pos_profile",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "POS Profile",
+   "no_copy": 1,
    "options": "POS Profile",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fetch_from": "pos_opening_entry.user",
@@ -69,6 +77,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Cashier",
+   "no_copy": 1,
    "options": "User",
    "read_only": 1,
    "reqd": 1
@@ -89,6 +98,7 @@
   {
    "fieldname": "cash_amount",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Cash Amount",
    "precision": "2",
    "reqd": 1
@@ -100,6 +110,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "Draft\nOpen\nClosed\nCancelled",
    "read_only": 1
   },
@@ -107,17 +118,31 @@
    "allow_on_submit": 1,
    "fieldname": "pos_closing_entry",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "POS Closing Entry",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mode of Payment",
+   "options": "Mode of Payment",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-14 03:52:17.030127",
+ "modified": "2020-08-14 05:00:31.003292",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Evacuation Entry",
