@@ -27,6 +27,15 @@ class POSClosingEntry(Document):
 
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
 			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
+		self.validate_payment_reconciliation()
+
+
+	def validate_payment_reconciliation(self):
+		for row in self.payment_reconciliation:
+			if not row.closing_amount or row.closing_amount == 0:
+				row.closing_amount = flt(row.expected_amount - row.evacuation_amount + row.opening_amount)
+			row.difference = flt(row.expected_amount - row.closing_amount - row.evacuation_amount + row.opening_amount)
+
 
 	def on_submit(self):
 		merge_pos_invoices(self.pos_transactions)
