@@ -49,11 +49,65 @@ class POSClosingEntry(Document):
 			evacuation_entry.pos_closing_entry = self.name
 			evacuation_entry.set_status()
 			evacuation_entry.save()
+		self.make_journal_entry()
 
 	def get_payment_reconciliation_details(self):
 		currency = frappe.get_cached_value('Company', self.company,  "default_currency")
 		return frappe.render_template("erpnext/accounts/doctype/pos_closing_entry/closing_voucher_details.html",
 			{"data": self, "currency": currency})
+	
+	def make_journal_entry(self):
+		pos_profile = frappe.get_doc("POS Profile", self.pos_profile)
+		for row in self.payment_reconciliation:
+			if frappe.get_value("Mode of Payment",row.mode_of_payment,"type") != "Cash":
+				continue
+			default_currency = frappe.get_value("Company", self.company, "default_currency")
+			cash_account = get_bank_cash_account(row.mode_of_payment, self.company)
+			cash_amount = row.closing_amount - row.opening_amount
+			expected_amount = row.total_amount - row.opening_amount
+			jl_rows = []
+			debit_row = dict(
+				account = pos_profile.evacuation_cash_account,
+				debit_in_account_currency = cash_amount,
+				account_curremcy = default_currency,
+				cost_center =  pos_profile.cost_center or "",
+			)
+			jl_rows.append(debit_row)
+
+			credit_row = dict(
+				account = cash_account,
+				credit_in_account_currency = expected_amount,
+				account_curremcy = default_currency,
+				cost_center =  pos_profile.cost_center or "",
+			)
+			jl_rows.append(credit_row)
+
+			if row.difference != 0:
+				difference_row = dict(
+				account = pos_profile.write_off_account,
+				debit_in_account_currency = row.difference if row.difference > 0 else 0,
+				credit_in_account_currency = (row.difference * (-1)) if row.difference < 0 else 0,
+				account_curremcy = default_currency,
+				cost_center =  pos_profile.write_off_cost_center or "",
+				)
+				jl_rows.append(difference_row)
+
+
+			user_remark = "Against " + self.doctype + " : " + self.name
+			jv_doc = frappe.get_doc(dict(
+				doctype = "Journal Entry",
+				posting_date = self.posting_date,
+				accounts = jl_rows,
+				company = self.company,
+				multi_currency = 0,
+				user_remark = user_remark
+			))
+
+			jv_doc.flags.ignore_permissions = True
+			frappe.flags.ignore_account_permission = True
+			jv_doc.save()
+			jv_doc.submit()
+			row.journal_entry = jv_doc.name
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -141,3 +195,12 @@ def make_closing_entry_from_opening(opening_entry):
 	closing_entry.set("taxes", taxes)
 
 	return closing_entry
+
+
+def get_bank_cash_account(mode_of_payment, company):
+	account = frappe.db.get_value("Mode of Payment Account",
+		{"parent": mode_of_payment, "company": company}, "default_account")
+	if not account:
+		frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
+			.format(mode_of_payment))
+	return account
