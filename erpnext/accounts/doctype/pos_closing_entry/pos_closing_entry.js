@@ -36,11 +36,13 @@ frappe.ui.form.on('POS Closing Entry', {
 		frappe.db.get_doc("POS Opening Entry", frm.doc.pos_opening_entry)
 			.then(({ balance_details }) => {
 				balance_details.forEach(detail => {
+					let evacuation_amount = get_total_evacuation(detail.mode_of_payment, frm);
 					frm.add_child("payment_reconciliation", {
 						mode_of_payment: detail.mode_of_payment,
 						opening_amount: detail.opening_amount,
-						expected_amount: detail.opening_amount,
-						evacuation_amount: get_total_evacuation(detail.mode_of_payment, frm)
+						expected_amount: 0,
+						evacuation_amount: evacuation_amount,
+						total_amount: detail.opening_amount - evacuation_amount ,
 					});
 				})
 			});
@@ -56,19 +58,20 @@ frappe.ui.form.on('POS Closing Entry', {
 			},
 			callback: (r) => {
 				let pos_docs = r.message;
-				set_form_data(pos_docs, frm)
-				refresh_fields(frm)
-				set_html_data(frm)
+				set_form_data(pos_docs, frm);
+				refresh_fields(frm);
+				set_html_data(frm);
 			}
-		})
+		});
 	}
 });
 
 frappe.ui.form.on('POS Closing Entry Detail', {
 	closing_amount: (frm, cdt, cdn) => {
 		const row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount - row.evacuation_amount))
-	}
+		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount - row.evacuation_amount + row.opening_amount));
+		frappe.model.set_value(cdt, cdn, "total_amount", flt(row.expected_amount + row.opening_amount - row.evacuation_amount));
+	},
 })
 
 function set_form_data(data, frm) {
@@ -96,6 +99,7 @@ function add_to_payments(d, frm) {
 		const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
 		if (payment) {
 			payment.expected_amount += flt(p.amount);
+			payment.total_amount += flt(p.amount);
 		} else {
 			frm.add_child("payment_reconciliation", {
 				mode_of_payment: p.mode_of_payment,

@@ -6,10 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "mode_of_payment",
+  "expected_amount",
   "opening_amount",
   "evacuation_amount",
   "closing_amount",
-  "expected_amount",
+  "total_amount",
   "difference"
  ],
  "fields": [
@@ -27,7 +28,7 @@
    "fieldname": "expected_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Expected Amount",
+   "label": "Total Amount",
    "options": "company:company_currency",
    "read_only": 1,
    "reqd": 1
@@ -42,7 +43,7 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "opening_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -67,12 +68,22 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Evacuation Amount",
+   "options": "company:company_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Expected Amount",
+   "options": "company:company_currency",
    "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-08-14 05:08:25.611686",
+ "modified": "2020-08-15 15:50:23.866668",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry Detail",
