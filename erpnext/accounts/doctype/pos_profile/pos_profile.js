@@ -36,6 +36,16 @@ frappe.ui.form.on('POS Profile', {
 			};
 		});
 
+		frm.set_query("evacuation_cash_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					account_type: ['in', ["Cash", "Bank"]],
+					is_group: 0
+				}
+			};
+		});
+
 		frm.set_query("account_for_change_amount", function() {
 			return {
 				filters: {

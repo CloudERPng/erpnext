@@ -41,6 +41,7 @@
   "write_off_account",
   "write_off_cost_center",
   "account_for_change_amount",
+  "evacuation_cash_account",
   "column_break_23",
   "income_account",
   "expense_account",
@@ -339,12 +340,19 @@
    "fieldname": "display_items_in_stock",
    "fieldtype": "Check",
    "label": "Display Items In Stock"
+  },
+  {
+   "fieldname": "evacuation_cash_account",
+   "fieldtype": "Link",
+   "label": "Evacuation Cash Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-08-14 01:15:43.302238",
+ "modified": "2020-08-15 17:19:33.430460",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
