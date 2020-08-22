@@ -11,6 +11,7 @@ from frappe.utils import getdate, get_datetime, flt
 from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+from erpnext.accounts.doctype.pos_evacuation_entry.pos_evacuation_entry import get_total_evacuation 
 
 class POSClosingEntry(Document):
 	def validate(self):
@@ -32,6 +33,7 @@ class POSClosingEntry(Document):
 
 	def validate_payment_reconciliation(self):
 		for row in self.payment_reconciliation:
+			row.evacuation_amount = get_total_evacuation(self.pos_opening_entry,row.mode_of_payment)
 			if not row.closing_amount or row.closing_amount == 0:
 				row.closing_amount = flt(row.expected_amount - row.evacuation_amount + row.opening_amount)
 			row.difference = flt(row.expected_amount - row.closing_amount - row.evacuation_amount + row.opening_amount)
