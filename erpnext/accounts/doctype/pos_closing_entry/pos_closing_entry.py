@@ -35,8 +35,8 @@ class POSClosingEntry(Document):
 		for row in self.payment_reconciliation:
 			row.evacuation_amount = get_total_evacuation(self.pos_opening_entry,row.mode_of_payment)
 			if not row.closing_amount or row.closing_amount == 0:
-				row.closing_amount = flt(row.expected_amount - row.evacuation_amount + row.opening_amount)
-			row.difference = flt(row.expected_amount - row.closing_amount - row.evacuation_amount + row.opening_amount)
+				row.closing_amount = flt(row.expected_amount - row.evacuation_amount + row.opening_amount -row.change_amount)
+			row.difference = flt(row.expected_amount - row.closing_amount - row.evacuation_amount + row.opening_amount -row.change_amount)
 
 
 	def on_submit(self):

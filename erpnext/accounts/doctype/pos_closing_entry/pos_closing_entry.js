@@ -59,6 +59,7 @@ frappe.ui.form.on('POS Closing Entry', {
 			callback: (r) => {
 				let pos_docs = r.message;
 				set_form_data(pos_docs, frm);
+				set_cash_change_amount(pos_docs, frm);
 				refresh_fields(frm);
 				set_html_data(frm);
 			}
@@ -69,8 +70,8 @@ frappe.ui.form.on('POS Closing Entry', {
 frappe.ui.form.on('POS Closing Entry Detail', {
 	closing_amount: (frm, cdt, cdn) => {
 		const row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount - row.evacuation_amount + row.opening_amount));
-		frappe.model.set_value(cdt, cdn, "total_amount", flt(row.expected_amount + row.opening_amount - row.evacuation_amount));
+		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount - row.evacuation_amount + row.opening_amount -row.change_amount));
+		frappe.model.set_value(cdt, cdn, "total_amount", flt(row.expected_amount + row.opening_amount - row.evacuation_amount -row.change_amount));
 	},
 })
 
@@ -82,6 +83,20 @@ function set_form_data(data, frm) {
 		frm.doc.total_quantity += flt(d.total_qty);
 		add_to_payments(d, frm);
 		add_to_taxes(d, frm);
+	});
+}
+
+function set_cash_change_amount(data, frm) {
+	data.forEach(d => {
+		d.payments.forEach(p => {
+			const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
+			if (payment.mode_of_payment == "Cash") {
+				payment.change_amount += flt(d.change_amount);
+				payment.difference = flt(payment.expected_amount - payment.closing_amount - payment.evacuation_amount + payment.opening_amount -payment.change_amount);
+				payment.total_amount = flt(payment.expected_amount + payment.opening_amount - payment.evacuation_amount -payment.change_amount);
+				
+			} 
+		});
 	});
 }
 
@@ -167,4 +182,4 @@ function get_total_evacuation(mode_of_payment, frm) {
 		}
 	})
 	return evacuation_amount;
-}	
+}
