@@ -156,8 +156,11 @@ erpnext.PointOfSale.ItemSelector = class {
                     this.search_field.set_focus();
                     $(this.search_field.$input[0]).val(sScancode).trigger("input");
                     this.barcode_scanned = true;
+                    setTimeout(() => {
+                        me.$component.find(".item-wrapper")[0].click();
+                    },500)
                 }
-            }
+            },
         });
 
 		this.$component.on('click', '.item-wrapper', function() {
