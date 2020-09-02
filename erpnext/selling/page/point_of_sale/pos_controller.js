@@ -296,7 +296,7 @@ erpnext.PointOfSale.Controller = class {
 					this.cart.toggle_numpad(minimize);
 				},
 
-				form_updated: async (cdt, cdn, fieldname, value) => {
+				form_updated: async (cdt, cdn, fieldname, value, from_bar) => {
 					const item_row = frappe.model.get_doc(cdt, cdn);
 					if (item_row && item_row[fieldname] != value) {
 
@@ -309,7 +309,8 @@ erpnext.PointOfSale.Controller = class {
 						const event = {
 							field: fieldname,
 							value,
-							item: { item_code, batch_no, uom, variant_of, has_variants }
+							item: { item_code, batch_no, uom, variant_of, has_variants },
+							from_bar
 						}
 						return this.on_cart_update(event)
 					}
@@ -757,11 +758,10 @@ erpnext.PointOfSale.Controller = class {
 	async on_cart_update(args) {
 		frappe.dom.freeze();
 		try {
-			let { field, value, item } = args;
+			let { field, value, item, from_bar } = args;
 			const { item_code, batch_no, serial_no, uom, variant_of, has_variants } = item;
 			let item_row = this.get_item_from_frm(item_code, batch_no, uom);
-
-			const item_selected_from_selector = field === 'qty'
+			const item_selected_from_selector = field === 'qty' && (value === "+1" || from_bar)
 
 			if (item_row) {
 				item_selected_from_selector && (value = item_row.qty + flt(value))

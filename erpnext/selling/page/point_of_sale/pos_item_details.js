@@ -151,6 +151,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$form_container.html('');
 
 		fields_to_display.forEach((fieldname, idx) => {
+			
 			this.$form_container.append(
 				`<div class="">
 					<div class="item_detail_field ${fieldname}-control" data-fieldname="${fieldname}"></div>
