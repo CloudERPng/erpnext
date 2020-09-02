@@ -48,6 +48,7 @@
   "taxes_and_charges",
   "tax_category",
   "apply_discount_on",
+  "allow_partial_payment",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
@@ -347,12 +348,18 @@
    "label": "Evacuation Cash Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_partial_payment",
+   "fieldtype": "Check",
+   "label": "Allow Partial Payment"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-08-15 17:19:33.430460",
+ "modified": "2020-09-02 04:01:30.296329",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

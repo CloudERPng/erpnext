@@ -221,7 +221,7 @@ erpnext.PointOfSale.Payment = class {
 				frappe.utils.play_sound("error");
 				return;
 			}
-			if (outstanding_amount > 0 || !items.length) {
+			if ((outstanding_amount > 0 && !cur_frm.allow_partial_payment) || !items.length ) {
 				const message = items.length ? __("You cannot submit the order without full payment.") : __("You cannot submit empty order.")
 				frappe.show_alert({ message, indicator: "orange" });
 				frappe.utils.play_sound("error");

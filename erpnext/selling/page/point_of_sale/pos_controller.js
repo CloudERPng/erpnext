@@ -126,6 +126,7 @@ erpnext.PointOfSale.Controller = class {
 		frappe.db.get_doc("POS Profile", this.pos_profile).then((profile) => {
 			this.customer_groups = profile.customer_groups.map(group => group.customer_group);
 			this.cart.make_customer_selector();
+			this.allow_partial_payment = profile.allow_partial_payment;
 		});
 
 		this.item_stock_map = {};
@@ -734,6 +735,7 @@ erpnext.PointOfSale.Controller = class {
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 						this.frm.doc.campaign = r.message.campaign;
+						this.frm.allow_partial_payment = this.allow_partial_payment;
 					}
 				}
 				resolve();
