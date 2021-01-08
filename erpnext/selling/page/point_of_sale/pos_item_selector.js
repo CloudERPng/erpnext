@@ -5,10 +5,10 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.pos_profile = pos_profile;
 		this.hide_images = settings.hide_images;
 		this.auto_add_item = settings.auto_add_item_to_cart;
-		
+
 		this.inti_component();
 	}
-	
+
 	inti_component() {
 		this.prepare_dom();
 		this.make_search_bar();
@@ -33,7 +33,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				</div>
 			</section>`
 		);
-		
+
 		this.$component = this.wrapper.find('.items-selector');
 		this.$items_container = this.$component.find('.items-container');
 	}
@@ -58,7 +58,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		let { item_group, pos_profile } = this;
 
 		!item_group && (item_group = this.parent_item_group);
-		
+
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
@@ -78,7 +78,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	get_item_html(item) {
 		const me = this;
-		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, variant_of, has_variants } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 
 		function get_item_image_html() {
@@ -96,6 +96,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		return (
 			`<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}"
 				data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+				data-variant-of="${escape(variant_of)}" data-has-variants="${escape(has_variants)}"
 				title="Avaiable Qty: ${actual_qty}">
 				${get_item_image_html()}
 				<div class="flex items-center pr-4 pl-4 h-10 justify-between">
@@ -168,19 +169,58 @@ erpnext.PointOfSale.ItemSelector = class {
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
-			
+			let variant_of = unescape($item.attr('data-variant-of'));
+      let has_variants = unescape($item.attr('data-has-variants'));
+
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
+			variant_of = variant_of === "undefined" ? undefined : variant_of;
+			            has_variants = has_variants === "undefined" ? undefined : has_variants;
+			            if (has_variants == 1) {
+											frappe.dom.freeze();
+			                me.events.get_item_variants(item_code);
+			            }
+			            else {
+										let value;
+							if (me.pesokg && me.pesokg > 0){
+									value = `+${me.pesokg}`;
+									me.pesokg = '';
+							}
+							else{
+									value = "+1";
+							}
+							me.events.item_selected({ field: 'qty', value: value, item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}});
+			            }
 
-			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
 		})
 
 		this.search_field.$input.on('input', (e) => {
 			clearTimeout(this.last_search);
 			this.last_search = setTimeout(() => {
-				const search_term = e.target.value;
+				let search_term
+	                // if (this.barcode_scanned && e.target.value.startsWith('221')){
+	                if (e.target.value.startsWith('221')){
+	                    me.pesokg = '';
+	                    search_term = e.target.value.substr(0,7);
+	                    let pesokg1 = e.target.value.substr(7,5);
+	                    let pesokg;
+	                    if (pesokg1.startsWith('0000')) {
+	                        pesokg='0.00' + pesokg1.substr(4);
+	                    } else if (pesokg1.startsWith('000')) {
+	                        pesokg='0.0' + pesokg1.substr(3);
+	                    } else if (pesokg1.startsWith('00')) {
+	                        pesokg='0.' + pesokg1.substr(2);
+	                    } else if (pesokg1.startsWith('0')) {
+	                        pesokg=pesokg1.substr(1,1) +'.' + pesokg1.substr(2,pesokg1.length);
+	                    } else if (!pesokg1.startsWith('0')) {
+	                        pesokg=pesokg1.substr(0,2) +'.' + pesokg1.substr(2,pesokg1.length);
+	                    }
+	                    me.pesokg = pesokg;
+	                }else {
+	                    search_term = e.target.value;
+	                }
 				this.filter_items({ search_term });
 			}, 300);
 		});
@@ -228,7 +268,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		});
 	}
-	
+
 	filter_items({ search_term='' }={}) {
 		if (search_term) {
 			search_term = search_term.toLowerCase();
@@ -259,14 +299,14 @@ erpnext.PointOfSale.ItemSelector = class {
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
 	}
-	
+
 	resize_selector(minimize) {
-		minimize ? 
-		this.$component.find('.search-field').removeClass('mr-8') : 
+		minimize ?
+		this.$component.find('.search-field').removeClass('mr-8') :
 		this.$component.find('.search-field').addClass('mr-8');
 
-		minimize ? 
-		this.$component.find('.filter-section').addClass('flex-col') : 
+		minimize ?
+		this.$component.find('.filter-section').addClass('flex-col') :
 		this.$component.find('.filter-section').removeClass('flex-col');
 
 		minimize ?

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from erpnext.accounts.utils import get_account_currency
@@ -45,6 +46,8 @@ class POSInvoice(SalesInvoice):
 		self.validate_pos()
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
+		if self.apply_sales_order == 1:
+			self.update_stock = 0
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -58,6 +61,26 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+		self.check_sales_order()
+
+	def check_sales_order(self):
+		if self.apply_sales_order == 1 and self.docstatus == 1:
+			sales_order_doc = make_sales_order(self.name)
+			if sales_order_doc:
+				sales_order_doc.delivery_date = self.delivery_date or nowdate()
+				sales_order_doc.flags.ignore_permissions = True
+				sales_order_doc.flags.ignore_account_permission = True
+				sales_order_doc.save()
+				sales_order_doc.submit()
+				url = frappe.utils.get_url_to_form(sales_order_doc.doctype, sales_order_doc.name)
+				msgprint = "Sales Order Created at <a href='{0}'>{1}</a>".format(url,sales_order_doc.name)
+				frappe.msgprint(_(msgprint), title="Sales Order Created", indicator="green")
+				i = 0
+				for item in  sales_order_doc.items:
+					self.items[i].sales_order =  sales_order_doc.name
+					self.items[i].so_detail =  item.name
+					i += 1
+				self.save()
 
 	def on_cancel(self):
 		# run on cancel method of selling controller
@@ -164,7 +187,7 @@ class POSInvoice(SalesInvoice):
 				serial_nos = get_serial_nos(d.serial_no)
 				for sr in serial_nos:
 					serial_no_exists = frappe.db.exists("POS Invoice Item", {
-						"parent": self.return_against, 
+						"parent": self.return_against,
 						"serial_no": ["like", d.get("serial_no")]
 					})
 					if not serial_no_exists:
@@ -174,7 +197,7 @@ class POSInvoice(SalesInvoice):
 							_("Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}")
 							.format(d.idx, bold_serial_no, bold_return_against)
 						)
-	
+
 	def validate_non_stock_items(self):
 		for d in self.get("items"):
 			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
@@ -274,7 +297,7 @@ class POSInvoice(SalesInvoice):
 
 		if not self.get('payments') and not for_validate:
 			update_multi_mode_option(self, profile)
-		
+
 		if self.is_return and not for_validate:
 			add_return_modes(self, profile)
 
@@ -450,6 +473,68 @@ def make_merge_log(invoices):
 
 	if merge_log.get('pos_invoices'):
 		return merge_log.as_dict()
+
+
+
+def make_sales_order(source_name, target_doc=None):
+	# quotation = frappe.db.get_value("POS Invoice", source_name, ["transaction_date", "valid_till"], as_dict = 1)
+	return _make_sales_order(source_name, target_doc)
+
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
+	# customer = _make_customer(source_name, ignore_permissions)
+
+	def set_missing_values(source, target):
+		# if customer:
+		# 	target.customer = customer.name
+		# 	target.customer_name = customer.customer_name
+		# if source.referral_sales_partner:
+		# 	target.sales_partner=source.referral_sales_partner
+		# 	target.commission_rate=frappe.get_value('Sales Partner', source.referral_sales_partner, 'commission_rate')
+		target.ignore_pricing_rule = 1
+		target.flags.ignore_permissions = ignore_permissions
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(obj, target, source_parent):
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+
+		# if obj.against_blanket_order:
+		# 	target.against_blanket_order = obj.against_blanket_order
+		# 	target.blanket_order = obj.blanket_order
+		# 	target.blanket_order_rate = obj.blanket_order_rate
+
+	doclist = get_mapped_doc("POS Invoice", source_name, {
+			"POS Invoice": {
+				"doctype": "Sales Order",
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			},
+			"POS Invoice Item": {
+				"doctype": "Sales Order Item",
+				"field_map": {
+					"cost_center": "cost_center",
+					"Warehouse":"warehouse",
+				},
+				"postprocess": update_item
+			},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"add_if_empty": True
+			},
+			"Sales Team": {
+				"doctype": "Sales Team",
+				"add_if_empty": True
+			},
+			"Payment Schedule": {
+				"doctype": "Payment Schedule",
+				"add_if_empty": True
+			}
+		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
+
+	# postprocess: fetch shipping address, set missing values
+
+	return doclist
 
 def add_return_modes(doc, pos_profile):
 	def append_payment(payment_mode):

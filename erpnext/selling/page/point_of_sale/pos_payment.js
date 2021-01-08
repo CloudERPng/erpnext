@@ -13,7 +13,7 @@ erpnext.PointOfSale.Payment = class {
 		this.initialize_numpad();
 		this.bind_events();
 		this.attach_shortcuts();
-		
+
 	}
 
 	prepare_dom() {
@@ -25,6 +25,10 @@ erpnext.PointOfSale.Payment = class {
 					</div>
 					<div class="payment-modes flex flex-wrap"></div>
 					<div class="invoice-details-section"></div>
+					<div class="checkbox flex">
+						<input type="checkbox" class="apply-sales-order input-with-feedback" data-fieldtype="Check"</input>
+						<span class="label-area">Send for Production</span>
+					</div>
 					<div class="flex mt-auto justify-center w-full">
 						<div class="flex flex-col justify-center flex-1 ml-4">
 							<div class="flex w-full">
@@ -50,6 +54,7 @@ erpnext.PointOfSale.Payment = class {
 		this.$remarks = this.$component.find('.remarks');
 		this.$numpad = this.$component.find('.number-pad');
 		this.$invoice_details_section = this.$component.find('.invoice-details-section');
+		this.$apply_sales_order = this.$component.find('.apply-sales-order');
 	}
 
 	make_invoice_fields_control() {
@@ -84,7 +89,7 @@ erpnext.PointOfSale.Payment = class {
 				}
 
 				this[`${df.fieldname}_field`] = frappe.ui.form.make_control({
-					df: { 
+					df: {
 						...df,
 						...df_events
 					},
@@ -175,6 +180,36 @@ erpnext.PointOfSale.Payment = class {
 			}
 		})
 
+		this.$apply_sales_order.change(function(e) {
+			if(this.checked) {
+				let d = new frappe.ui.Dialog({
+					title: 'Production details',
+					fields: [
+						{
+							label: 'Delivery Date ',
+							fieldname: 'delivery_date',
+							fieldtype: 'Date',
+							default: me.$delivery_date || frappe.datetime.nowdate()
+						},
+						{
+							label: 'Production Note',
+							fieldname: 'production_note',
+							fieldtype: 'Small Text',
+							default: me.$production_note || ''
+						}
+					],
+					primary_action_label: 'Apply',
+					primary_action(values) {
+						me.$production_note = values.production_note;
+						me.$delivery_date = values.delivery_date;
+						d.hide();
+					}
+				});
+
+				d.show();
+			}
+		})
+
 		frappe.realtime.on("process_phone_payment", function(data) {
 			frappe.dom.unfreeze();
 			cur_frm.reload_doc();
@@ -202,7 +237,7 @@ erpnext.PointOfSale.Payment = class {
 			const doc = this.events.get_frm().doc;
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
-
+			this.$apply_sales_order = this.$component.find('.apply-sales-order:checked').length > 0;
 			if (paid_amount == 0 || !items.length) {
 				const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.")
 				frappe.show_alert({ message, indicator: "orange" });
@@ -267,14 +302,14 @@ erpnext.PointOfSale.Payment = class {
 				const payment_is_visible = this.$component.is(":visible");
 				let active_mode = this.$payment_modes.find(".border-primary");
 				active_mode = active_mode.length ? active_mode.attr("data-mode") : undefined;
-	
+
 				if (!active_mode) return;
-	
+
 				const mode_of_payments = Array.from(this.$payment_modes.find(".mode-of-payment")).map(m => $(m).attr("data-mode"));
 				const mode_index = mode_of_payments.indexOf(active_mode);
 				const next_mode_index = (mode_index + 1) % mode_of_payments.length;
 				const next_mode_to_be_clicked = this.$payment_modes.find(`.mode-of-payment[data-mode="${mode_of_payments[next_mode_index]}"]`);
-	
+
 				if (payment_is_visible && mode_index != next_mode_index) {
 					next_mode_to_be_clicked.click();
 				}
@@ -310,10 +345,13 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	checkout() {
+		this.$production_note = '';
+		this.$delivery_date = frappe.datetime.nowdate();
 		this.events.toggle_other_sections(true);
 		this.toggle_component(true);
 
 		this.render_payment_section();
+		this.$component.find('.apply-sales-order').prop('checked', false);
 	}
 
 	toggle_remarks_control() {
@@ -393,7 +431,7 @@ erpnext.PointOfSale.Payment = class {
 		})
 
 		this.render_loyalty_points_payment_mode();
-		
+
 		this.attach_cash_shortcuts(doc);
 	}
 
@@ -432,7 +470,7 @@ erpnext.PointOfSale.Payment = class {
 			let nearest_x = get_nearest(grand_total, x);
 			nearest_x = finalArr.indexOf(nearest_x) != -1 ? nearest_x + x : nearest_x;
 			return [...finalArr, nearest_x];
-		}, []);	
+		}, []);
 	}
 
 	render_loyalty_points_payment_mode() {
@@ -441,7 +479,7 @@ erpnext.PointOfSale.Payment = class {
 		const { loyalty_program, loyalty_points, conversion_factor } = this.events.get_customer_details();
 
 		this.$payment_modes.find(`.mode-of-payment[data-mode="loyalty-amount"]`).parent().remove();
-		
+
 		if (!loyalty_program) return;
 
 		let description, read_only, max_redeemable_amount;

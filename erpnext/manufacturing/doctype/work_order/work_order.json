@@ -21,6 +21,8 @@
   "produced_qty",
   "sales_order",
   "project",
+  "production_note_section",
+  "production_note",
   "settings_section",
   "allow_alternative_item",
   "use_multi_level_bom",
@@ -489,6 +491,17 @@
    "fieldtype": "Float",
    "label": "Lead Time",
    "read_only": 1
+ },
+{
+"fieldname": "production_note_section",
+"fieldtype": "Section Break",
+"label": "Production Note"
+},
+{
+"fieldname": "production_note",
+"fieldtype": "Small Text",
+"label": "Production Note",
+"read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -496,7 +509,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-05 19:32:43.323054",
+ "modified": "2021-01-08 12:07:43.323054",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
