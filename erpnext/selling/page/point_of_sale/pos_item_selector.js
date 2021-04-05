@@ -170,7 +170,8 @@ erpnext.PointOfSale.ItemSelector = class {
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
 			let variant_of = unescape($item.attr('data-variant-of'));
-      let has_variants = unescape($item.attr('data-has-variants'));
+      		let has_variants = unescape($item.attr('data-has-variants'));
+			let  from_bar = false;
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
@@ -187,11 +188,13 @@ erpnext.PointOfSale.ItemSelector = class {
 							if (me.pesokg && me.pesokg > 0){
 									value = `+${me.pesokg}`;
 									me.pesokg = '';
+									from_bar = true;
 							}
 							else{
 									value = "+1";
-							}
-							me.events.item_selected({ field: 'qty', value: value, item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}});
+									from_bar = false;
+								}   
+								me.events.item_selected({ field: 'qty', value: value, item: { item_code, batch_no, serial_no, uom, variant_of, has_variants}, from_bar});
 			            }
 
 		})

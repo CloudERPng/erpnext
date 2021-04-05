@@ -19,7 +19,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 	result = []
 
 	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-	warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
+	warehouse, hide_unavailable_items, hide_variants = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items', 'hide_variants'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -46,7 +46,6 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 	condition = get_conditions(item_code, serial_no, batch_no, barcode)
 	conditions = ""
 
-	hide_variants = data.get('hide_variants')
 	if hide_variants:
 		conditions = " AND variant_of IS NULL"
 	condition += get_item_group_condition(pos_profile)
@@ -357,7 +356,7 @@ def get_items_has_attribute(item_code, price_list, pos_profile, attr_list=None):
 		display_items_in_stock = 0
 
 		if pos_profile:
-			warehouse, display_items_in_stock, hide_variants = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock', 'hide_variants'])
+			warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
 
 		items = [d.item_code for d in items_data]
 		item_prices_data = frappe.get_all("Item Price",
